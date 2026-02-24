@@ -1,8 +1,8 @@
-# Amper - A Bitcoin Powered Web Wallet
+# Vault - A Bitcoin Powered Web Wallet
 
 ## Overview
 
-Amper is a browser extension inspired by MetaMask that enables seamless interaction with the L402 protocol. It acts as a "web wallet" for managing macaroon tokens and facilitating payments over the Lightning Network. The wallet is designed to simplify the process of authenticating and paying for API services using the L402 standard.
+Vault is a browser extension inspired by MetaMask that enables seamless interaction with the L402 protocol. It acts as a "web wallet" for managing macaroon tokens and facilitating payments over the Lightning Network. The wallet is designed to simplify the process of authenticating and paying for API services using the L402 standard.
 
 ## Features
 
@@ -17,14 +17,14 @@ Amper is a browser extension inspired by MetaMask that enables seamless interact
 ### Prerequisites
 
 - A Lightning wallet (e.g., LND, Phoenix, or any compatible wallet).
-- A server implementing the L402 protocol (e.g., [lsat](https://github.com/Byzantium-ETS/lsat)).
+- A server implementing the L402 protocol (e.g., [amper](https://github.com/Byzantium-ETS/amper)).
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Byzantium-ETS/amper.git
-   cd amper
+   git clone https://github.com/Byzantium-ETS/vault.git
+   cd vault
    ```
 
 2. Install dependencies:
