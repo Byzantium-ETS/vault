@@ -11,7 +11,7 @@
 //    remains a pure TS module. Integrations with extension storage or RPC
 //    should be done by the background/content layer or via adapters.
 
-import { Caveat, Macaroon } from "../macaroon";
+import { Macaroon } from "../macaroon";
 import { Either } from "fp-ts/lib/Either";
 
 export interface ChallengeFactory {
@@ -20,13 +20,23 @@ export interface ChallengeFactory {
    *
    * @param amount - The monetary amount for the challenge.
    * @param paymentMethod - The payment method to be used (e.g., "lightning", "bitcoin", "etc..").
-   * @returns A Caveat object representing the payment challenge.
+   * @returns Challenge - The payment challenge.
    */
   createChallenge(
     amount: number,
     paymentMethod: string,
-  ): Either<string, Caveat>;
+  ): Either<string, Challenge>;
 }
 
+//
+export type Challenge = {
+  invoice: string;
+  receipt: string;
+};
+
 // A token is a macaroon that can be used to authenticate requests
-export type Token = Macaroon;
+export type Token = {
+  macaroon: Macaroon;
+  // The receipt associated with the Challenge
+  receipt: string;
+};
