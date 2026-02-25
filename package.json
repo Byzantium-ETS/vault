@@ -1,8 +1,8 @@
 {
-  "name": "amper",
+  "name": "vault",
   "version": "0.1.0",
   "private": true,
-  "description": "Amper — a browser extension for managing L402 macaroon tokens.",
+  "description": "Vault — a browser extension for managing L402 macaroon tokens.",
   "author": "",
   "license": "MIT",
   "engines": {
@@ -18,10 +18,15 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
-    "esbuild": "^0.18.20",
-    "typescript": "^5.2.2",
+    "@types/chrome": "^0.0.189",
+    "@types/node": "^20.19.33",
     "copyfiles": "^2.4.1",
+    "esbuild": "^0.18.20",
     "rimraf": "^5.0.0",
-    "@types/chrome": "^0.0.189"
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "fp-ts": "^2.16.11"
   }
 }

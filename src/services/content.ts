@@ -1,5 +1,5 @@
 /**
- * Minimal TypeScript content script stub for Amper
+ * Minimal TypeScript content script stub for Vault
  *
  * Responsibilities:
  *  - Provide a small bridge between page context and extension background
@@ -19,7 +19,9 @@ type BackgroundResponse<T = any> = { success: boolean; [k: string]: any } & T;
 /**
  * Send a message to the background service worker and await the response.
  */
-function sendToBackground<T = any>(message: Record<string, any>): Promise<BackgroundResponse<T>> {
+function sendToBackground<T = any>(
+  message: Record<string, any>,
+): Promise<BackgroundResponse<T>> {
   return new Promise((resolve) => {
     try {
       chrome.runtime.sendMessage(message, (resp: BackgroundResponse<T>) => {
@@ -27,13 +29,19 @@ function sendToBackground<T = any>(message: Record<string, any>): Promise<Backgr
         // We normalize to a structured response
         if (!resp) {
           const lastErr = chrome.runtime?.lastError;
-          resolve({ success: false, error: String(lastErr?.message ?? "no response") } as unknown as BackgroundResponse<T>);
+          resolve({
+            success: false,
+            error: String(lastErr?.message ?? "no response"),
+          } as unknown as BackgroundResponse<T>);
           return;
         }
         resolve(resp);
       });
     } catch (err: any) {
-      resolve({ success: false, error: String(err?.message ?? err) } as unknown as BackgroundResponse<T>);
+      resolve({
+        success: false,
+        error: String(err?.message ?? err),
+      } as unknown as BackgroundResponse<T>);
     }
   });
 }
@@ -48,8 +56,15 @@ export async function parseChallenge(header: string | null) {
   return resp.challenge ?? null;
 }
 
-export async function createTokenFromHeader(header: string | null, metadata?: Record<string, unknown>) {
-  const resp = await sendToBackground({ type: "CREATE_TOKEN_FROM_HEADER", header, metadata });
+export async function createTokenFromHeader(
+  header: string | null,
+  metadata?: Record<string, unknown>,
+) {
+  const resp = await sendToBackground({
+    type: "CREATE_TOKEN_FROM_HEADER",
+    header,
+    metadata,
+  });
   if (!resp.success) return null;
   return resp.token ?? null;
 }
@@ -71,7 +86,8 @@ export async function payInvoice(invoice: string) {
  */
 export function injectScript(file: string, node: "head" | "body" = "body") {
   try {
-    const target = document.getElementsByTagName(node)[0] || document.documentElement;
+    const target =
+      document.getElementsByTagName(node)[0] || document.documentElement;
     const script = document.createElement("script");
     script.setAttribute("type", "text/javascript");
     // chrome.runtime.getURL is available in content scripts
@@ -82,7 +98,7 @@ export function injectScript(file: string, node: "head" | "body" = "body") {
       script.remove();
     });
   } catch (err) {
-    console.error("Amper: injectScript failed", err);
+    console.error("Vault: injectScript failed", err);
   }
 }
 
@@ -90,16 +106,16 @@ export function injectScript(file: string, node: "head" | "body" = "body") {
  * Simple window <-> extension messaging bridge.
  *
  * Page authors (or an injected script) can post messages to the page window:
- *   window.postMessage({ amper: true, type: 'GET_TOKENS' }, '*');
+ *   window.postMessage({ vault: true, type: 'GET_TOKENS' }, '*');
  *
  * This content script listens, forwards to the background, and posts a reply
  * back to the window:
- *   window.postMessage({ amper: true, type: 'GET_TOKENS_RESPONSE', success: true, tokens }, '*');
+ *   window.postMessage({ vault: true, type: 'GET_TOKENS_RESPONSE', success: true, tokens }, '*');
  *
  * This keeps communication asynchronous and avoids cross-extension leaks.
  */
 
-const BRIDGE_FLAG = "amper";
+const BRIDGE_FLAG = "vault";
 
 /**
  * Valid request types we will accept from page context.
@@ -121,7 +137,16 @@ window.addEventListener("message", (ev) => {
   const { type, requestId } = msg;
   if (!type || !ALLOWED_PAGE_REQUESTS.has(type)) {
     // Respond with an error to the page so it's easier to debug
-    window.postMessage({ amper: true, type: `${type}_RESPONSE`, requestId, success: false, error: "unsupported_request" }, "*");
+    window.postMessage(
+      {
+        amper: true,
+        type: `${type}_RESPONSE`,
+        requestId,
+        success: false,
+        error: "unsupported_request",
+      },
+      "*",
+    );
     return;
   }
 
@@ -131,33 +156,87 @@ window.addEventListener("message", (ev) => {
         case "PARSE_CHALLENGE": {
           const header: string | null = msg.header ?? null;
           const challenge = await parseChallenge(header);
-          window.postMessage({ amper: true, type: "PARSE_CHALLENGE_RESPONSE", requestId, success: true, challenge }, "*");
+          window.postMessage(
+            {
+              amper: true,
+              type: "PARSE_CHALLENGE_RESPONSE",
+              requestId,
+              success: true,
+              challenge,
+            },
+            "*",
+          );
           break;
         }
         case "CREATE_TOKEN_FROM_HEADER": {
           const header: string | null = msg.header ?? null;
           const metadata = msg.metadata ?? {};
           const token = await createTokenFromHeader(header, metadata);
-          window.postMessage({ amper: true, type: "CREATE_TOKEN_FROM_HEADER_RESPONSE", requestId, success: !!token, token }, "*");
+          window.postMessage(
+            {
+              amper: true,
+              type: "CREATE_TOKEN_FROM_HEADER_RESPONSE",
+              requestId,
+              success: !!token,
+              token,
+            },
+            "*",
+          );
           break;
         }
         case "GET_TOKENS": {
           const tokens = await getTokens();
-          window.postMessage({ amper: true, type: "GET_TOKENS_RESPONSE", requestId, success: true, tokens }, "*");
+          window.postMessage(
+            {
+              amper: true,
+              type: "GET_TOKENS_RESPONSE",
+              requestId,
+              success: true,
+              tokens,
+            },
+            "*",
+          );
           break;
         }
         case "PAY_INVOICE": {
           const invoice: string = msg.invoice;
           const resp = await payInvoice(invoice);
-          window.postMessage({ amper: true, type: "PAY_INVOICE_RESPONSE", requestId, success: resp?.success === true, result: resp }, "*");
+          window.postMessage(
+            {
+              amper: true,
+              type: "PAY_INVOICE_RESPONSE",
+              requestId,
+              success: resp?.success === true,
+              result: resp,
+            },
+            "*",
+          );
           break;
         }
         default: {
-          window.postMessage({ amper: true, type: `${type}_RESPONSE`, requestId, success: false, error: "internal_error" }, "*");
+          window.postMessage(
+            {
+              vault: true,
+              type: `${type}_RESPONSE`,
+              requestId,
+              success: false,
+              error: "internal_error",
+            },
+            "*",
+          );
         }
       }
     } catch (err: any) {
-      window.postMessage({ amper: true, type: `${type}_RESPONSE`, requestId, success: false, error: String(err?.message ?? err) }, "*");
+      window.postMessage(
+        {
+          amper: true,
+          type: `${type}_RESPONSE`,
+          requestId,
+          success: false,
+          error: String(err?.message ?? err),
+        },
+        "*",
+      );
     }
   })();
 });
@@ -165,4 +244,4 @@ window.addEventListener("message", (ev) => {
 /**
  * Basic initialization log so developers can see the content script is active.
  */
-console.info("Amper content script loaded");
+console.info("Vault content script loaded");

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Amper",
+  "name": "Vault",
   "version": "1.0.0",
-  "description": "Amper — a browser extension for managing L402 macaroon tokens.",
+  "description": "Vault — a browser extension for managing L402 macaroon tokens.",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["*://*/*"],
   "action": {
