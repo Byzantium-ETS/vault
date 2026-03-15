@@ -28,13 +28,13 @@ export interface ChallengeFactory {
   ): Either<string, Challenge>;
 }
 
-//
+/** A payment challenge */
 export type Challenge = {
   invoice: string;
   receipt: string;
 };
 
-// A token is a macaroon that can be used to authenticate requests
+/** A token is a macaroon that can be used to authenticate requests */
 export type Token = {
   macaroon: Macaroon;
   // The receipt associated with the Challenge
